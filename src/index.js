@@ -121,15 +121,21 @@ class Game extends React.Component {
         const moves = history.map((step, moveNumber) => {
             const { col, row } = step.move;
             const mark = step.squares[indexFromMove(step.move)];
-            const desc = moveNumber
+            const description = moveNumber
                 ? `Go to move #${moveNumber}: (col ${col}, row ${row}):: ${mark}`
                 : "Go to game start";
+            //console.log({ moveNumber, stepNumber });
+            const isSelected =
+                moveNumber === stepNumber ? "button-selected" : "";
+            console.log(isSelected);
             return (
                 <li key={moveNumber}>
-                    {" "}
-                    <button onClick={() => this.jumpTo(moveNumber)}>
-                        {desc}
-                    </button>{" "}
+                    <button
+                        className={isSelected}
+                        onClick={() => this.jumpTo(moveNumber)}
+                    >
+                        {description}
+                    </button>
                 </li>
             );
         });
