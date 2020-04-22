@@ -50,25 +50,73 @@ class Board extends React.Component {
         return (
             <Square
                 value={this.props.squares[i]}
+                key={i}
                 onClick={() => this.props.onClick(i)}
             />
         );
     }
 
-    renderBoard() {
+    render() {
         let rows = [];
         for (let row = 1; row <= 3; row++) {
             let squares = [];
             for (let col = 1; col <= 3; col++) {
                 squares.push(this.renderSquare(indexFromRowCol({ row, col })));
             }
-            rows.push(<div children={squares} className="board-row"></div>);
+            rows.push(
+                <div children={squares} key={row} className="board-row"></div>
+            );
         }
         return <div children={rows} />;
     }
+}
+
+class MoveList extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            desc: true,
+        };
+        this.handleClickReverseOrder = this.handleClickReverseOrder.bind(this);
+    }
+
+    handleClickReverseOrder() {
+        this.setState({
+            desc: !this.state.desc,
+        });
+    }
 
     render() {
-        return this.renderBoard();
+        const { history, stepNumber, onClick } = this.props;
+        const moves = history.map((step, moveNumber) => {
+            const { col, row } = step.move;
+            const mark = step.squares[indexFromRowCol(step.move)];
+            const isSelected = moveNumber === stepNumber;
+            const selectionDescription = isSelected ? "On" : "Go to";
+            const description = moveNumber
+                ? `${selectionDescription} move #${moveNumber}: (col ${col}, row ${row}):: ${mark}`
+                : `${selectionDescription} game start`;
+
+            return (
+                <li key={moveNumber}>
+                    <button
+                        className={isSelected ? "button-selected" : ""}
+                        onClick={() => onClick(moveNumber)}
+                    >
+                        {description}
+                    </button>
+                </li>
+            );
+        });
+
+        return (
+            <>
+                <ol children={this.state.desc ? moves : moves.reverse()} />
+                <button onClick={this.handleClickReverseOrder}>
+                    reverse order {this.state.desc ? "desc" : "asc"}
+                </button>
+            </>
+        );
     }
 }
 
@@ -112,26 +160,6 @@ class Game extends React.Component {
             ? `Winner: ${winner}`
             : `Next player: ${xIsNext ? "X" : "O"}`;
 
-        const moves = history.map((step, moveNumber) => {
-            const { col, row } = step.move;
-            const mark = step.squares[indexFromRowCol(step.move)];
-            const isSelected = moveNumber === stepNumber;
-            const selectionDescription = isSelected ? "On" : "Go to";
-            const description = moveNumber
-                ? `${selectionDescription} move #${moveNumber}: (col ${col}, row ${row}):: ${mark}`
-                : `${selectionDescription} game start`;
-
-            return (
-                <li key={moveNumber}>
-                    <button
-                        className={isSelected ? "button-selected" : ""}
-                        onClick={() => this.jumpTo(moveNumber)}
-                    >
-                        {description}
-                    </button>
-                </li>
-            );
-        });
         return (
             <div className="game">
                 <div className="game-board">
@@ -144,7 +172,11 @@ class Game extends React.Component {
                 </div>
                 <div className="game-info">
                     <div className="status">{status}</div>
-                    <ol>{moves}</ol>
+                    <MoveList
+                        history={history}
+                        stepNumber={stepNumber}
+                        onClick={(stepNumber) => this.jumpTo(stepNumber)}
+                    />
                 </div>
             </div>
         );
