@@ -26,14 +26,14 @@ function calculateWinner(squares) {
     return null;
 }
 
-function moveFromIndex(i) {
+function rowColFromIndex(i) {
     return {
         col: (i % 3) + 1,
         row: Math.floor(i / 3) + 1,
     };
 }
 
-function indexFromMove({ row, col }) {
+function indexFromRowCol({ row, col }) {
     return (row - 1) * 3 + (col - 1);
 }
 
@@ -55,26 +55,20 @@ class Board extends React.Component {
         );
     }
 
+    renderBoard() {
+        let rows = [];
+        for (let row = 1; row <= 3; row++) {
+            let squares = [];
+            for (let col = 1; col <= 3; col++) {
+                squares.push(this.renderSquare(indexFromRowCol({ row, col })));
+            }
+            rows.push(<div children={squares} className="board-row"></div>);
+        }
+        return <div children={rows} />;
+    }
+
     render() {
-        return (
-            <div>
-                <div className="board-row">
-                    {this.renderSquare(0)}
-                    {this.renderSquare(1)}
-                    {this.renderSquare(2)}
-                </div>
-                <div className="board-row">
-                    {this.renderSquare(3)}
-                    {this.renderSquare(4)}
-                    {this.renderSquare(5)}
-                </div>
-                <div className="board-row">
-                    {this.renderSquare(6)}
-                    {this.renderSquare(7)}
-                    {this.renderSquare(8)}
-                </div>
-            </div>
-        );
+        return this.renderBoard();
     }
 }
 
@@ -95,7 +89,7 @@ class Game extends React.Component {
         const { winner, xIsNext } = this.state;
         if (squares[i] || winner) return;
         squares[i] = xIsNext ? "X" : "O";
-        const move = { ...moveFromIndex(i), mark: squares[i] };
+        const move = { ...rowColFromIndex(i), mark: squares[i] };
         this.setState({
             history: [...history, { squares, move }],
             xIsNext: !xIsNext,
@@ -120,16 +114,17 @@ class Game extends React.Component {
 
         const moves = history.map((step, moveNumber) => {
             const { col, row } = step.move;
-            const mark = step.squares[indexFromMove(step.move)];
+            const mark = step.squares[indexFromRowCol(step.move)];
+            const isSelected = moveNumber === stepNumber;
+            const selectionDescription = isSelected ? "On" : "Go to";
             const description = moveNumber
-                ? `Go to move #${moveNumber}: (col ${col}, row ${row}):: ${mark}`
-                : "Go to game start";
-            const isSelected =
-                moveNumber === stepNumber ? "button-selected" : "";
+                ? `${selectionDescription} move #${moveNumber}: (col ${col}, row ${row}):: ${mark}`
+                : `${selectionDescription} game start`;
+
             return (
                 <li key={moveNumber}>
                     <button
-                        className={isSelected}
+                        className={isSelected ? "button-selected" : ""}
                         onClick={() => this.jumpTo(moveNumber)}
                     >
                         {description}
