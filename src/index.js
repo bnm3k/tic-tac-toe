@@ -124,10 +124,8 @@ class Game extends React.Component {
             const description = moveNumber
                 ? `Go to move #${moveNumber}: (col ${col}, row ${row}):: ${mark}`
                 : "Go to game start";
-            //console.log({ moveNumber, stepNumber });
             const isSelected =
                 moveNumber === stepNumber ? "button-selected" : "";
-            console.log(isSelected);
             return (
                 <li key={moveNumber}>
                     <button
