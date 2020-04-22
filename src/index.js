@@ -23,7 +23,8 @@ function calculateWinner(squares) {
             return { winner: squares[a], winningSquares: [a, b, c] };
         }
     }
-    return { winner: null, winningSquares: [] };
+    const isBoardFilled = !squares.includes(null);
+    return { winner: isBoardFilled ? "D" : null, winningSquares: [] };
 }
 
 function rowColFromIndex(i) {
@@ -170,7 +171,9 @@ class Game extends React.Component {
         const { winner, xIsNext, history, stepNumber } = this.state;
         const current = history[stepNumber];
         const status = winner
-            ? `Winner: ${winner}`
+            ? winner === "D"
+                ? "Draw!"
+                : `Winner: ${winner}`
             : `Next player: ${xIsNext ? "X" : "O"}`;
 
         return (
